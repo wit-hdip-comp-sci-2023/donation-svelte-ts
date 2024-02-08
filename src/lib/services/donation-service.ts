@@ -4,7 +4,7 @@ import type { Candidate, Donation } from "./donation-types";
 
 export const donationService = {
   // baseUrl: "http://localhost:4000",
-  baseUrl: "https://zealous-candle-timer.glitch.me",
+  baseUrl: "https://donation-web-ts.glitch.me",
 
   async login(email: string, password: string): Promise<boolean> {
     try {
