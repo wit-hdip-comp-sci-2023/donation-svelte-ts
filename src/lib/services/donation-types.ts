@@ -6,11 +6,11 @@ export type User = {
   _id: string;
 };
 
-export interface LoggedInUser {
-  email: string;
-  token: string;
+export type Session = {
+  name: string;
   _id: string;
-}
+  token: string;
+};
 
 export interface Candidate {
   firstName: string;
@@ -27,4 +27,9 @@ export interface Donation {
   lat: number;
   lng: number;
   _id: string;
+}
+
+export interface DataSet {
+  labels: string[];
+  datasets: [{ values: number[] }];
 }

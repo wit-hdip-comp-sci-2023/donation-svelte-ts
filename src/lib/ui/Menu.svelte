@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { loggedInUser } from "$lib/stores";
+  import { currentSession } from "$lib/stores";
 </script>
 
 <nav class="navbar is-full-width">
@@ -13,7 +13,9 @@
       <div class="navbar-end">
         <a class="navbar-item" href="/donate"> Donate </a>
         <a class="navbar-item" href="/report"> Report </a>
-        <a class="navbar-item" href="/logout"> Logout [{$loggedInUser?.email}]</a>
+        <a class="navbar-item" href="/charts"> Charts </a>
+        <a class="navbar-item" href="/maps"> Maps </a>
+        <a data-sveltekit-preload-data="tap" class="navbar-item" href="/logout"> Logout [{$currentSession?.name}]</a>
       </div>
       <div></div>
     </div>

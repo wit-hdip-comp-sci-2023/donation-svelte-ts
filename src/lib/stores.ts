@@ -1,5 +1,5 @@
 import { writable } from "svelte/store";
-import type { Donation, LoggedInUser } from "./services/donation-types";
+import type { Donation, Session } from "./services/donation-types";
 
-export const loggedInUser = writable<LoggedInUser>();
+export const currentSession = writable<Session>();
 export const latestDonation = writable<Donation>();

@@ -1,8 +1,9 @@
 <script lang="ts">
   import { donationService } from "$lib/services/donation-service";
   import type { Candidate } from "$lib/services/donation-types";
-  import { loggedInUser } from "$lib/stores";
+  import { currentSession, latestDonation } from "$lib/stores";
   import Coordinates from "$lib/ui/Coordinates.svelte";
+  import { get } from "svelte/store";
 
   export let candidateList: Candidate[] = [];
 
@@ -16,8 +17,7 @@
 
   async function donate() {
     if (selectedCandidate && amount && selectedMethod) {
-      const candidateNames = selectedCandidate.split(",");
-      const candidate = candidateList.find((candidate) => candidate.lastName == candidateNames[0] && candidate.firstName == candidateNames[1]);
+      const candidate = candidateList.find((candidate) => candidate._id === selectedCandidate);
       if (candidate) {
         const donation = {
           amount: amount,
@@ -25,10 +25,12 @@
           candidate: candidate,
           lat: lat,
           lng: lng,
-          donor: $loggedInUser.email,
+          donor: $currentSession.name,
           _id: ""
         };
-        const success = await donationService.donate(donation);
+        const success = await donationService.donate(donation, get(currentSession));
+        latestDonation.set(donation);
+
         if (!success) {
           message = "Donation not completed - some error occurred";
           return;
@@ -59,7 +61,7 @@
     <div class="select">
       <select bind:value={selectedCandidate}>
         {#each candidateList as candidate}
-          <option>{candidate.lastName},{candidate.firstName}</option>
+          <option value={candidate._id}>{candidate.lastName},{candidate.firstName}</option>
         {/each}
       </select>
     </div>
@@ -71,3 +73,8 @@
     </div>
   </div>
 </form>
+<div class="box mt-4">
+  <div class="content has-text-centered">
+    {message}
+  </div>
+</div>
