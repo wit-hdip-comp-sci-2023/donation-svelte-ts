@@ -14,21 +14,21 @@
   import LeafletMap from "$lib/ui/LeafletMap.svelte";
   import DonationList from "$lib/ui/DonationList.svelte";
 
-  export let data: any;
-
   let donations: Donation[] = [];
   let candidateList: Candidate[] = [];
   let byCandidate: any;
   let map: LeafletMap;
 
   onMount(async () => {
-    candidateList = data.candidates;
-    donations = data.donations;
-    byCandidate = data.byCandidate;
-    for (let i = 0; i < data.donations.length; i++) {
-      const popup = `${data.donations[i].candidate.firstName} ${data.donations[i].candidate.lastName}: €${data.donations[i].amount}`;
-      await map.addMarker(data.donations[i].lat, data.donations[i].lng, popup);
+    candidateList = await donationService.getCandidates(get(currentSession));
+    donations = await donationService.getDonations(get(currentSession));
+    byCandidate = generateByCandidate(donations, candidateList);
+    for (let i = 0; i < donations.length; i++) {
+      const donation = donations[i];
+      const popup = `${donation.candidate.firstName} ${donation.candidate.lastName}: €${donation.amount}`;
+      await map.addMarker(donation.lat, donation.lng, popup);
     }
+
     const lastDonation = donations[donations.length - 1];
     if (lastDonation) map.moveTo(lastDonation.lat, lastDonation.lng);
   });

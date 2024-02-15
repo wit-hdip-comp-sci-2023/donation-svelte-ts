@@ -2,8 +2,7 @@ import axios from "axios";
 import type { Candidate, Donation, Session } from "./donation-types";
 
 export const donationService = {
-  // baseUrl: "http://localhost:4000",
-  baseUrl: "https://donation-web-ts.glitch.me",
+  baseUrl: "http://localhost:4000",
   async login(email: string, password: string): Promise<Session | null> {
     try {
       const response = await axios.post(`${this.baseUrl}/api/users/authenticate`, { email, password });
