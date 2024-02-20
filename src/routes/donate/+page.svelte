@@ -14,21 +14,18 @@
   import LeafletMap from "$lib/ui/LeafletMap.svelte";
   import DonationList from "$lib/ui/DonationList.svelte";
 
-  let donations: Donation[] = [];
-  let candidateList: Candidate[] = [];
-  let byCandidate: any;
+  export let data: any;
+
+  let donations = data.donations;
+  let byCandidate = data.byCandidate;
+  let candidateList = data.candidates;
   let map: LeafletMap;
 
   onMount(async () => {
-    candidateList = await donationService.getCandidates(get(currentSession));
-    donations = await donationService.getDonations(get(currentSession));
-    byCandidate = generateByCandidate(donations, candidateList);
-    for (let i = 0; i < donations.length; i++) {
-      const donation = donations[i];
-      const popup = `${donation.candidate.firstName} ${donation.candidate.lastName}: €${donation.amount}`;
-      await map.addMarker(donation.lat, donation.lng, popup);
+    for (let i = 0; i < data.donations.length; i++) {
+      const popup = `${data.donations[i].candidate.firstName} ${data.donations[i].candidate.lastName}: €${data.donations[i].amount}`;
+      await map.addMarker(data.donations[i].lat, data.donations[i].lng, popup);
     }
-
     const lastDonation = donations[donations.length - 1];
     if (lastDonation) map.moveTo(lastDonation.lat, lastDonation.lng);
   });
@@ -38,7 +35,10 @@
       donations.push(donation);
       donations = [...donations];
       byCandidate = generateByCandidate(donations, candidateList);
-      const popup = `${donation.candidate.firstName} ${donation.candidate.lastName}: €${donation.amount}`;
+      let popup = `€${donation.amount}`;
+      if (typeof donation.candidate !== "string") {
+        popup += ` donated for ${donation.candidate.firstName} ${donation.candidate.lastName}`;
+      }
       map.addMarker(donation.lat, donation.lng, popup);
       map.moveTo(donation.lat, donation.lng);
     }
@@ -55,19 +55,19 @@
   </div>
   <div class="column">
     <Card title="Please Donate">
-      <DonateForm {candidateList} />
+      <DonateForm candidates={data.candidates} />
     </Card>
   </div>
 </div>
 <div class="columns">
   <div class="column">
     <Card title="Donatinons to Date">
-      <Chart data={byCandidate} type="bar" />
+      <Chart data={data.byCandidate} type="bar" />
     </Card>
   </div>
   <div class="column">
     <Card title="Please Donate">
-      <DonationList {donations} />
+      <DonationList donations={data.donations} />
     </Card>
   </div>
 </div>

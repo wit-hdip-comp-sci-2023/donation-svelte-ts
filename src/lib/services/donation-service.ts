@@ -1,17 +1,17 @@
-import axios from "axios";
 import type { Candidate, Donation, Session } from "./donation-types";
+import { DonationMongoose } from "$lib/models/donation";
+import { CandidateMongoose } from "$lib/models/candidate";
+import { UserMongoose } from "$lib/models/user";
 
 export const donationService = {
-  baseUrl: "http://localhost:4000",
   async login(email: string, password: string): Promise<Session | null> {
     try {
-      const response = await axios.post(`${this.baseUrl}/api/users/authenticate`, { email, password });
-      if (response.data.success) {
-        axios.defaults.headers.common["Authorization"] = "Bearer " + response.data.token;
+      const user = await UserMongoose.findOne({ email: email }).lean();
+      if (user !== null && user.password === password) {
         const session = {
-          name: response.data.name,
-          token: response.data.token,
-          _id: response.data.id
+          name: `${user.firstName} ${user.lastName}`,
+          token: "TOKEN",
+          _id: user._id.toString()
         };
         return session;
       }
@@ -24,19 +24,22 @@ export const donationService = {
 
   async donate(donation: Donation, session: Session) {
     try {
-      axios.defaults.headers.common["Authorization"] = "Bearer " + session.token;
-      const response = await axios.post(this.baseUrl + "/api/candidates/" + donation.candidate._id + "/donations", donation);
-      return response.status == 200;
+      console.log(donation);
+      let newDonation = new DonationMongoose({ ...donation });
+      await newDonation.save();
+      newDonation = (await DonationMongoose.findOne({ _id: newDonation._id }).populate("candidate").lean()) as any;
+      return newDonation;
     } catch (error) {
+      console.log(error);
       return false;
     }
   },
 
   async getCandidates(session: Session): Promise<Candidate[]> {
     try {
-      axios.defaults.headers.common["Authorization"] = "Bearer " + session.token;
-      const response = await axios.get(this.baseUrl + "/api/candidates");
-      return response.data;
+      let candidates = (await CandidateMongoose.find().lean()) as Candidate[];
+      candidates = JSON.parse(JSON.stringify(candidates));
+      return candidates;
     } catch (error) {
       return [];
     }
@@ -44,9 +47,14 @@ export const donationService = {
 
   async getDonations(session: Session): Promise<Donation[]> {
     try {
-      axios.defaults.headers.common["Authorization"] = "Bearer " + session.token;
-      const response = await axios.get(this.baseUrl + "/api/donations");
-      return response.data;
+      let donations = (await DonationMongoose.find().populate("donor").populate("candidate")) as Donation[];
+      donations = JSON.parse(JSON.stringify(donations));
+      donations.forEach((donation) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        donation.donor = `${donation.donor.firstName} ${donation.donor.lastName}`;
+      });
+      return donations;
     } catch (error) {
       return [];
     }

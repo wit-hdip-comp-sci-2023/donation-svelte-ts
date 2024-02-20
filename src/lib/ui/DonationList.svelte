@@ -21,7 +21,9 @@
           {donation.method}
         </td>
         <td>
-          {donation.candidate.lastName}, {donation.candidate.firstName}
+          {#if typeof donation.candidate !== "string"}
+            {donation.candidate.lastName}, {donation.candidate.firstName}
+          {/if}
         </td>
         <td>
           {donation.donor}

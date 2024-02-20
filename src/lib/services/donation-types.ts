@@ -22,11 +22,10 @@ export interface Candidate {
 export interface Donation {
   amount: number;
   method: string;
-  candidate: Candidate;
+  candidate: Candidate | string;
   donor: string;
   lat: number;
   lng: number;
-  _id: string;
 }
 
 export interface DataSet {
